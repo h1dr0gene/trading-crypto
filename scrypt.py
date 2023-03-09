@@ -27,8 +27,8 @@ df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
 
 #indicator defining 
-df['SMA20'] = ta.sma(df['close'], length=20)
-df['SMA60'] = ta.sma(df['close'], length=60)
+df['SMA20'] = ta.sma(df['close'], length=10)
+df['SMA60'] = ta.sma(df['close'], length=20)
 
 #stratégie backtest 
 print(df)
@@ -50,7 +50,7 @@ for index, row in df.iterrows():
             btc = 0
             sell_price = df['close'][index]
             print("SELL BTC at", sell_price, '$ the', index)
-            print("Profit:", sell_price / buy_price)
+            print("Profit:", sell_price - buy_price)
     lastIndex = index
 
 #test and final result 
