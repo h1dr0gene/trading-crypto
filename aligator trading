@@ -3,6 +3,7 @@ from binance.client import Client
 import pandas as pd 
 import pandas_ta as pta 
 import ta as ta
+import numpy as np
 
 #create dataset 
 
@@ -37,6 +38,7 @@ df['EMA4'] = pta.ema(df['close'], length=100)
 df['EMA5'] = pta.ema(df['close'], length=121)
 df['EMA6'] = pta.ema(df['close'], length=200)
 
+df['Stock_RSI'] = ta.momentum.stockrsi(close = df('close'), window=14, smooth1=3, smooth2=3  )
 
 #stratégie backtest 
 print(df)
