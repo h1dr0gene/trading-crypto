@@ -27,8 +27,8 @@ df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
 
 #indicator defining 
-df['SMA20'] = ta.sma(df['close'], length=10)
-df['SMA60'] = ta.sma(df['close'], length=20)
+df['SMA20'] = ta.sma(df['close'], length=20)
+df['SMA60'] = ta.sma(df['close'], length=40)
 
 #stratégie backtest 
 print(df)
