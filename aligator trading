@@ -103,7 +103,7 @@ def openShortCondition(row, previousRow):
     and row['EMA5'] > row['EMA4'] 
     and row['EMA4'] > row['EMA3'] 
     and row['EMA3'] > row['EMA2'] 
-    and row['EMA2'] > row['EMA1'] 
+    and row['EMA2'] > row['EMA6'] 
     and row['STOCH_RSI'] > 0.2 ):
         return True
     else:
@@ -369,14 +369,14 @@ print("Number of positive LONG trades :",totalGoodLongTrade)
 print("Number of negative LONG trades :",totalBadLongTrade)
 print("LONG trade win rate ratio :", round(totalGoodLongTrade/TotalLongTrades*100, 2), '%')
 
-print("\n----- SHORT Trades Informations -----")
-print("Number of SHORT trades :",TotalShortTrades)
-print("Average SHORT trades performance :",AverageShortTrades, "%")
-print("Best  SHORT trade +"+bestShortTrade, "%, the ", idBestShort)
-print("Worst SHORT trade", worstShortTrade, "%, the ", idWorstShort)
-print("Number of positive SHORT trades :",totalGoodShortTrade)
-print("Number of negative SHORT trades :",totalBadShortTrade)
-print("SHORT trade win rate ratio :", round(totalGoodShortTrade/TotalShortTrades*100, 2), '%')
+#print("\n----- SHORT Trades Informations -----")
+#print("Number of SHORT trades :",TotalShortTrades)
+#print("Average SHORT trades performance :",AverageShortTrades, "%")
+#print("Best  SHORT trade +"+bestShortTrade, "%, the ", idBestShort)
+#print("Worst SHORT trade", worstShortTrade, "%, the ", idWorstShort)
+#print("Number of positive SHORT trades :",totalGoodShortTrade)
+#print("Number of negative SHORT trades :",totalBadShortTrade)
+#print("SHORT trade win rate ratio :", round(totalGoodShortTrade/TotalShortTrades*100, 2), '%')
 
 print (dt)
 #set value for the plot 
