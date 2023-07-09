@@ -103,7 +103,7 @@ def openShortCondition(row, previousRow):
     and row['EMA5'] > row['EMA4'] 
     and row['EMA4'] > row['EMA3'] 
     and row['EMA3'] > row['EMA2'] 
-    and row['EMA2'] > row['EMA1'] 
+    and row['EMA2'] > row['EMA6'] 
     and row['STOCH_RSI'] > 0.2 ):
         return True
     else:
