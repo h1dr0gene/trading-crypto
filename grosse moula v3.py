@@ -36,18 +36,18 @@ df.drop(df.columns.difference(['open','high','low','close','volume']), 1, inplac
 
 # -- Indicators, you can edit every value --
 # -- Exponential Moving Average --
-df['EMA1']= ta.trend.ema_indicator(close=df['close'], window=7)
+df['EMA1']= ta.trend.ema_indicator(close=df['close'], window=20)
 df['EMA2']= ta.trend.ema_indicator(close=df['close'], window=30)
-df['EMA3']= ta.trend.ema_indicator(close=df['close'], window=50)
-df['EMA4']= ta.trend.ema_indicator(close=df['close'], window=100)
-df['EMA5']= ta.trend.ema_indicator(close=df['close'], window=121)
-df['EMA6']= ta.trend.ema_indicator(close=df['close'], window=200)
+df['EMA3']= ta.trend.ema_indicator(close=df['close'], window=35)
+df['EMA4']= ta.trend.ema_indicator(close=df['close'], window=40)
+df['EMA5']= ta.trend.ema_indicator(close=df['close'], window=45)
+df['EMA6']= ta.trend.ema_indicator(close=df['close'], window=55)
 # -- Stochasitc RSI --
 df['STOCH_RSI'] = ta.momentum.stochrsi(close=df['close'], window=14, smooth1=3, smooth2=3)
 
 print("Indicators loaded 100%")
 
-# -- Uncomment the line below if you want to check your dataset with indicators --
+# --
 df
 
 dfTest = df.copy()
@@ -60,7 +60,7 @@ dt = pd.DataFrame(columns=['date', 'position', 'reason',
                            'price', 'frais', 'wallet', 'drawBack'])
 
 # -- You can change variables below --
-leverage = 3
+leverage = 6
 wallet = 1000
 makerFee = 0.0002
 takerFee = 0.0007
@@ -85,7 +85,7 @@ def openLongCondition(row, previousRow):
     and row['EMA3'] > row['EMA4'] 
     and row['EMA4'] > row['EMA5'] 
     and row['EMA5'] > row['EMA6'] 
-    and row['STOCH_RSI'] < 0.82):
+    and row['STOCH_RSI'] < 0.75):
         return True
     else:
         return False
@@ -103,8 +103,8 @@ def openShortCondition(row, previousRow):
     and row['EMA5'] > row['EMA4'] 
     and row['EMA4'] > row['EMA3'] 
     and row['EMA3'] > row['EMA2'] 
-    and row['EMA2'] > row['EMA6'] 
-    and row['STOCH_RSI'] > 0.2 ):
+    and row['EMA2'] > row['EMA1'] 
+    and row['STOCH_RSI'] > 0.25 ):
         return True
     else:
         return False
@@ -180,9 +180,9 @@ for index, row in dfTest.iterrows():
                 dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
 
     # -- If there is NO order in progress --
-    if orderInProgress == '':
+    # if orderInProgress == '':
         # -- Check If you have to open a LONG --
-        if openLongCondition(row, previousRow) == True:
+       # if openLongCondition(row, previousRow) == True:
             orderInProgress = 'LONG'
             closePrice = row['close']
             longIniPrice = row['close'] + takerFee * row['close']
@@ -198,7 +198,7 @@ for index, row in dfTest.iterrows():
             dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
             
         # -- Check If you have to open a SHORT --
-        if openShortCondition(row, previousRow) == True:
+       # if openShortCondition(row, previousRow) == True:
             orderInProgress = 'SHORT'
             closePrice = row['close']
             shortIniPrice = row['close'] - takerFee * row['close']
@@ -369,14 +369,14 @@ print("Number of positive LONG trades :",totalGoodLongTrade)
 print("Number of negative LONG trades :",totalBadLongTrade)
 print("LONG trade win rate ratio :", round(totalGoodLongTrade/TotalLongTrades*100, 2), '%')
 
-#print("\n----- SHORT Trades Informations -----")
-#print("Number of SHORT trades :",TotalShortTrades)
-#print("Average SHORT trades performance :",AverageShortTrades, "%")
-#print("Best  SHORT trade +"+bestShortTrade, "%, the ", idBestShort)
-#print("Worst SHORT trade", worstShortTrade, "%, the ", idWorstShort)
-#print("Number of positive SHORT trades :",totalGoodShortTrade)
-#print("Number of negative SHORT trades :",totalBadShortTrade)
-#print("SHORT trade win rate ratio :", round(totalGoodShortTrade/TotalShortTrades*100, 2), '%')
+print("\n----- SHORT Trades Informations -----")
+print("Number of SHORT trades :",TotalShortTrades)
+print("Average SHORT trades performance :",AverageShortTrades, "%")
+print("Best  SHORT trade +"+bestShortTrade, "%, the ", idBestShort)
+print("Worst SHORT trade", worstShortTrade, "%, the ", idWorstShort)
+print("Number of positive SHORT trades :",totalGoodShortTrade)
+print("Number of negative SHORT trades :",totalBadShortTrade)
+print("SHORT trade win rate ratio :", round(totalGoodShortTrade/TotalShortTrades*100, 2), '%')
 
 print (dt)
 #set value for the plot 
