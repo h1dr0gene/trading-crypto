@@ -42,14 +42,14 @@ ST_multiplier1 = 2.0
 ST_multiplier2 = 4.0
 ST_multiplier3 = 8.0
 
-# Calculate Supertrend indicators
-df['SUPER_TREND_DIRECTION1'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier1)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier1)]
-
 supertrend1 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier1)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier1)]
+supertrend2 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier2)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier2)]
+supertrend3 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier3)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier3)]
 
 # Calculate the derivative of SuperTrend
 df['SUPER_TREND_DERIVATIVE1'] = supertrend1.diff()
-
+df['SUPER_TREND_DERIVATIVE2'] = supertrend2.diff()
+df['SUPER_TREND_DERIVATIVE3'] = supertrend3.diff()
 
 # Print a message indicating that the data has been loaded
 print("Data loaded successfully")
@@ -84,14 +84,14 @@ test = 1
 
 # -- Condition to open Market LONG --
 def openLongCondition(row, previousRow):
-  if row['SUPER_TREND_DERIVATIVE1']> 0 :
+  if row['SUPER_TREND_DERIVATIVE1'] + row['SUPER_TREND_DERIVATIVE2'] + row['SUPER_TREND_DERIVATIVE3'] > 0 + row['STOCH_RSI'] > 0.8 :
    return True 
   else:
    return False 
 
 # -- Condition to close Market LONG --
 def closeLongCondition(row, previousRow):
-  if row['SUPER_TREND_DERIVATIVE1']<= 0 :
+  if row['SUPER_TREND_DERIVATIVE1'] + row['SUPER_TREND_DERIVATIVE2'] + row['SUPER_TREND_DERIVATIVE3'] <= 0 :
    return True
   else:
    return False
