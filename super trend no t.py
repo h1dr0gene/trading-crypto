@@ -44,17 +44,12 @@ ST_multiplier3 = 8.0
 
 # Calculate Supertrend indicators
 df['SUPER_TREND_DIRECTION1'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier1)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier1)]
-df['SUPER_TREND_DIRECTION2'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier2)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier2)]
-df['SUPER_TREND_DIRECTION3'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier3)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier3)]
 
 supertrend1 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier1)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier1)]
-supertrend2 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier2)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier2)]
-supertrend3 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier3)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier3)]
 
 # Calculate the derivative of SuperTrend
 df['SUPER_TREND_DERIVATIVE1'] = supertrend1.diff()
-df['SUPER_TREND_DERIVATIVE2'] = supertrend2.diff()
-df['SUPER_TREND_DERIVATIVE3'] = supertrend3.diff()
+
 
 # Print a message indicating that the data has been loaded
 print("Data loaded successfully")
@@ -68,7 +63,7 @@ dt = None
 dt = pd.DataFrame(columns = ['date','position', 'price', 'frais' ,'fiat', 'coins', 'wallet', 'drawBack'])
 
 # -- You can change variables below --
-leverage = 2
+leverage = 3
 wallet = 1000
 makerFee = 0.0002
 takerFee = 0.0007
@@ -89,14 +84,14 @@ test = 1
 
 # -- Condition to open Market LONG --
 def openLongCondition(row, previousRow):
-  if row['SUPER_TREND_DIRECTION1']>= 1 :
+  if row['SUPER_TREND_DERIVATIVE1']> 0 :
    return True 
   else:
    return False 
 
 # -- Condition to close Market LONG --
 def closeLongCondition(row, previousRow):
-  if row['SUPER_TREND_DIRECTION1']<= 1 :
+  if row['SUPER_TREND_DERIVATIVE1']<= 0 :
    return True
   else:
    return False
@@ -126,6 +121,9 @@ for index, row in dfTest.iterrows():
                 myrow ={'date': index, 'position': "LONG", 'reason': 'Close Long Market', 'price': closePrice,
                         'frais': takerFee * wallet * leverage, 'wallet': wallet, 'drawBack': (wallet-lastAth)/lastAth}
                 dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
+            else :
+                wallet_values.append(wallet) 
+    
     
     if orderInProgress == '':
         # -- Check If you have to open a LONG --
@@ -143,6 +141,7 @@ for index, row in dfTest.iterrows():
             myrow ={'date': index, 'position': "Open Long", 'reason': 'Open Long Market', 'price': closePrice,
                      'frais': takerFee * wallet * leverage, 'wallet': wallet, 'drawBack': (wallet-lastAth)/lastAth}
             dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
+        wallet_values.append(wallet) 
 
 # -- BackTest Analyses --
 dt = dt.set_index(dt['date'])
