@@ -47,6 +47,15 @@ df['SUPER_TREND_DIRECTION1'] = pda.supertrend(df['high'], df['low'], df['close']
 df['SUPER_TREND_DIRECTION2'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier2)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier2)]
 df['SUPER_TREND_DIRECTION3'] = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier3)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier3)]
 
+supertrend1 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier1)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier1)]
+supertrend2 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier2)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier2)]
+supertrend3 = pda.supertrend(df['high'], df['low'], df['close'], length=ST_length, multiplier=ST_multiplier3)['SUPERT_'+str(ST_length)+"_"+str(ST_multiplier3)]
+
+# Calculate the derivative of SuperTrend
+df['SUPER_TREND_DERIVATIVE1'] = supertrend1.diff()
+df['SUPER_TREND_DERIVATIVE2'] = supertrend2.diff()
+df['SUPER_TREND_DERIVATIVE3'] = supertrend3.diff()
+
 # Print a message indicating that the data has been loaded
 print("Data loaded successfully")
 
@@ -76,17 +85,18 @@ shortIniPrice = 0
 longLiquidationPrice = 500000
 shortLiquidationPrice = 0
 wallet_values = [1000]
-
+test = 1
 
 # -- Condition to open Market LONG --
 def openLongCondition(row, previousRow):
-  if row['SUPER_TREND_DIRECTION1']+row['SUPER_TREND_DIRECTION2']+row['SUPER_TREND_DIRECTION3'] >= 0 and row['STOCH_RSI'] < 0.8 and row['close']>row['EMA90']:
-   return True
+  if row['SUPER_TREND_DIRECTION1']>= 1 :
+   return True 
   else:
-   return False
+   return False 
+
 # -- Condition to close Market LONG --
 def closeLongCondition(row, previousRow):
-  if row['SUPER_TREND_DIRECTION1']+row['SUPER_TREND_DIRECTION2']+row['SUPER_TREND_DIRECTION3'] < 0 and row['STOCH_RSI'] > 0.2:
+  if row['SUPER_TREND_DIRECTION1']<= 1 :
    return True
   else:
    return False
@@ -103,7 +113,7 @@ for index, row in dfTest.iterrows():
                 print('/!\ YOUR LONG HAVE BEEN LIQUIDATED the',index)
                 break
             
-            # -- Check If you have to close the LONG --
+                # -- Check If you have to close the LONG --
             if closeLongCondition(row, previousRow) == True:
                 orderInProgress = ''
                 closePrice = row['close']
@@ -116,10 +126,7 @@ for index, row in dfTest.iterrows():
                 myrow ={'date': index, 'position': "LONG", 'reason': 'Close Long Market', 'price': closePrice,
                         'frais': takerFee * wallet * leverage, 'wallet': wallet, 'drawBack': (wallet-lastAth)/lastAth}
                 dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
-
-
-
-    # -- If there is NO order in progress --
+    
     if orderInProgress == '':
         # -- Check If you have to open a LONG --
         if openLongCondition(row, previousRow) == True:
@@ -168,124 +175,9 @@ holdWallet = holdPercentage * leverage * initalWallet
 algoPercentage = ((wallet - initalWallet)/initalWallet)
 vsHoldPercentage = ((wallet - holdWallet)/holdWallet) * 100
 
-try:
-    tradesPerformance = round(dt.loc[(dt['tradeIs'] == 'Good') | (dt['tradeIs'] == 'Bad'), 'resultat%'].sum()
-            / dt.loc[(dt['tradeIs'] == 'Good') | (dt['tradeIs'] == 'Bad'), 'resultat%'].count(), 2)
-except:
-    tradesPerformance = 0
-    print("/!\ There is no Good or Bad Trades in your BackTest, maybe a problem...")
+print (dfTest)
 
-try:
-    TotalGoodTrades = dt.groupby('tradeIs')['date'].nunique()['Good']
-    AveragePercentagePositivTrades = round(dt.loc[dt['tradeIs'] == 'Good', 'resultat%'].sum()
-                                           / dt.loc[dt['tradeIs'] == 'Good', 'resultat%'].count(), 2)
-    idbest = dt.loc[dt['tradeIs'] == 'Good', 'resultat%'].idxmax()
-    bestTrade = str(
-        round(dt.loc[dt['tradeIs'] == 'Good', 'resultat%'].max(), 2))
-except:
-    TotalGoodTrades = 0
-    AveragePercentagePositivTrades = 0
-    idbest = ''
-    bestTrade = 0
-    print("/!\ There is no Good Trades in your BackTest, maybe a problem...")
-
-try:
-    TotalBadTrades = dt.groupby('tradeIs')['date'].nunique()['Bad']
-    AveragePercentageNegativTrades = round(dt.loc[dt['tradeIs'] == 'Bad', 'resultat%'].sum()
-                                           / dt.loc[dt['tradeIs'] == 'Bad', 'resultat%'].count(), 2)
-    idworst = dt.loc[dt['tradeIs'] == 'Bad', 'resultat%'].idxmin()
-    worstTrade = round(dt.loc[dt['tradeIs'] == 'Bad', 'resultat%'].min(), 2)
-except:
-    TotalBadTrades = 0
-    AveragePercentageNegativTrades = 0
-    idworst = ''
-    worstTrade = 0
-    print("/!\ There is no Bad Trades in your BackTest, maybe a problem...")
-
-totalTrades = TotalBadTrades + TotalGoodTrades
-
-try:
-    TotalLongTrades = dt.groupby('position')['date'].nunique()['LONG']
-    AverageLongTrades = round(dt.loc[dt['position'] == 'LONG', 'resultat%'].sum()
-                              / dt.loc[dt['position'] == 'LONG', 'resultat%'].count(), 2)
-    idBestLong = dt.loc[dt['position'] == 'LONG', 'resultat%'].idxmax()
-    bestLongTrade = str(
-        round(dt.loc[dt['position'] == 'LONG', 'resultat%'].max(), 2))
-    idWorstLong = dt.loc[dt['position'] == 'LONG', 'resultat%'].idxmin()
-    worstLongTrade = str(
-        round(dt.loc[dt['position'] == 'LONG', 'resultat%'].min(), 2))
-except:
-    AverageLongTrades = 0
-    TotalLongTrades = 0
-    bestLongTrade = ''
-    idBestLong = ''
-    idWorstLong = ''
-    worstLongTrade = ''
-    print("/!\ There is no LONG Trades in your BackTest, maybe a problem...")
-
-try:
-    totalGoodLongTrade = dt.groupby(['position', 'tradeIs']).size()['LONG']['Good']
-except:
-    totalGoodLongTrade = 0
-    print("/!\ There is no good LONG Trades in your BackTest, maybe a problem...")
-
-try:
-    totalBadLongTrade = dt.groupby(['position', 'tradeIs']).size()['LONG']['Bad']
-except:
-    totalBadLongTrade = 0
-    print("/!\ There is no bad LONG Trades in your BackTest, maybe a problem...")
-
-TotalTrades = TotalGoodTrades + TotalBadTrades
-#winRateRatio = (TotalGoodTrades/TotalTrades) * 100
-
-reasons = dt['reason'].unique()
-
-print("BackTest finished, final wallet :",wallet,"$")
-dt
-print("Pair Symbol :",pairName,)
-print("Period : [" + str(dfTest.index[0]) + "] -> [" +
-      str(dfTest.index[len(dfTest)-1]) + "]")
-print("Starting balance :", initalWallet, "$")
-
-print("\n----- General Informations -----")
-print("Final balance :", round(wallet, 2), "$")
-print("Performance vs US Dollar :", round(algoPercentage*100, 2), "%")
-print("Buy and Hold Performence :", round(holdPercentage*100, 2),
-      "% | with Leverage :", round(holdPercentage*100, 2)*leverage, "%")
-print("Performance vs Buy and Hold :", round(vsHoldPercentage, 2), "%")
-print("Best trade : +"+bestTrade, "%, the ", idbest)
-print("Worst trade :", worstTrade, "%, the ", idworst)
-print("Worst drawBack :", str(100*round(dt['drawBack'].min(), 2)), "%")
-print("Total fees : ", round(dt['frais'].sum(), 2), "$")
-
-print("\n----- Trades Informations -----")
-print("Total trades on period :",totalTrades)
-print("Number of positive trades :", TotalGoodTrades)
-print("Number of negative trades : ", TotalBadTrades)
-print("Trades win rate ratio :", round(winRateRatio, 2), '%')
-print("Average trades performance :",tradesPerformance,"%")
-print("Average positive trades :", AveragePercentagePositivTrades, "%")
-print("Average negative trades :", AveragePercentageNegativTrades, "%")
-
-print("\n----- LONG Trades Informations -----")
-print("Number of LONG trades :",TotalLongTrades)
-print("Average LONG trades performance :",AverageLongTrades, "%")
-print("Best  LONG trade +"+bestLongTrade, "%, the ", idBestLong)
-print("Worst LONG trade", worstLongTrade, "%, the ", idWorstLong)
-print("Number of positive LONG trades :",totalGoodLongTrade)
-print("Number of negative LONG trades :",totalBadLongTrade)
-print("LONG trade win rate ratio :", round(totalGoodLongTrade/TotalLongTrades*100, 2), '%')
-
-#print("\n----- SHORT Trades Informations -----")
-#print("Number of SHORT trades :",TotalShortTrades)
-#print("Average SHORT trades performance :",AverageShortTrades, "%")
-#print("Best  SHORT trade +"+bestShortTrade, "%, the ", idBestShort)
-#print("Worst SHORT trade", worstShortTrade, "%, the ", idWorstShort)
-#print("Number of positive SHORT trades :",totalGoodShortTrade)
-#print("Number of negative SHORT trades :",totalBadShortTrade)
-#print("SHORT trade win rate ratio :", round(totalGoodShortTrade/TotalShortTrades*100, 2), '%')
-
-print (dt)
+print (wallet)
 #set value for the plot 
 dfTest.index = pd.to_datetime(dfTest.index)
 wallet_values = wallet_values[:-1]
