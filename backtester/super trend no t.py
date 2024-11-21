@@ -1,4 +1,5 @@
-# Import necessary libraries
+
+
 import pandas as pd
 from binance.client import Client
 import ta
@@ -63,7 +64,7 @@ dt = None
 dt = pd.DataFrame(columns = ['date','position', 'price', 'frais' ,'fiat', 'coins', 'wallet', 'drawBack'])
 
 # -- You can change variables below --
-leverage = 3
+leverage = 5
 wallet = 1000
 makerFee = 0.0002
 takerFee = 0.0007

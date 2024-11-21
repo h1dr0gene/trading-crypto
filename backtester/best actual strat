@@ -1,4 +1,4 @@
-# -- Import --
+
 import pandas as pd
 from binance.client import Client
 import ta
@@ -48,7 +48,7 @@ df['STOCH_RSI'] = ta.momentum.stochrsi(close=df['close'], window=14, smooth1=3, 
 print("Indicators loaded 100%")
 
 # -- Uncomment the line below if you want to check your dataset with indicators --
-df
+
 
 dfTest = df.copy()
 
