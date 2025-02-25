@@ -1,9 +1,9 @@
-# Import necessary libraries
+    # Import des librairie etpréparation
 import pandas as pd
 from binance.client import Client
 import ta
 import pandas_ta as pda
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt                                                                         
 
 # Define Binance Client
 client = Client()
@@ -11,28 +11,27 @@ client = Client()
 # Define the cryptocurrency pair, start date, and time interval
 pairName = "BTCUSDT"
 startDate = "01 Jan 2017"
-timeInterval = Client.KLINE_INTERVAL_12HOUR
+timeInterval = Client.KLINE_INTERVAL_1HOUR
 
-# Load historical price data from Binance API
+# récuprération de tout les trade passer depuis 2019
 klinesT = client.get_historical_klines(pairName, timeInterval, startDate)
 
-# Create a DataFrame from the data
+# Creation du dataframe 
 df = pd.DataFrame(klinesT, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_av', 'trades', 'tb_base_av', 'tb_quote_av', 'ignore'])
 
-# Convert relevant columns to numeric types
+# convertisage de donnée 
 df['close'] = pd.to_numeric(df['close'])
 df['high'] = pd.to_numeric(df['high'])
 df['low'] = pd.to_numeric(df['low'])
 df['open'] = pd.to_numeric(df['open'])
 
-# Set the 'timestamp' column as the index and convert it to datetime
+# création d'un indexage correspondant a l'heur des trades
 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 df.set_index('timestamp', inplace=True)
-
-# Drop unnecessary columns
+# retrait de colone inutile
 df.drop(columns=['close_time', 'quote_av', 'trades', 'tb_base_av', 'tb_quote_av', 'ignore'], inplace=True)
 
-# Calculate technical indicators
+# phases Définition et calcule des indiacteur
 df['EMA90'] = ta.trend.ema_indicator(close=df['close'], window=90)
 df['STOCH_RSI'] = ta.momentum.stochrsi(close=df['close'], window=14, smooth1=3, smooth2=3)
 
@@ -53,16 +52,12 @@ df['SUPER_TREND_DERIVATIVE3'] = supertrend3.diff()
 
 # Print a message indicating that the data has been loaded
 print("Data loaded successfully")
-
-
+#création d'un dataset de teste
 dfTest = df.copy()
-
-
-# dfTest = df['2021-01-01':]
 dt = None
 dt = pd.DataFrame(columns = ['date','position', 'price', 'frais' ,'fiat', 'coins', 'wallet', 'drawBack'])
 
-# -- You can change variables below --
+#variable du start
 leverage = 3
 wallet = 1000
 makerFee = 0.0002
@@ -143,21 +138,6 @@ for index, row in dfTest.iterrows():
             dt = pd.concat([dt, pd.DataFrame.from_records([myrow])], ignore_index=True)
         wallet_values.append(wallet) 
 
-# -- BackTest Analyses --
-dt = dt.set_index(dt['date'])
-dt.index = pd.to_datetime(dt.index)
-dt['resultat%'] = dt['wallet'].pct_change()*100
-
-dt['tradeIs'] = ''
-dt.loc[dt['resultat%'] > 0, 'tradeIs'] = 'Good'
-dt.loc[dt['resultat%'] < 0, 'tradeIs'] = 'Bad'
-
-iniClose = dfTest.iloc[0]['close']
-lastClose = dfTest.iloc[len(dfTest)-1]['close']
-holdPercentage = ((lastClose - iniClose)/iniClose)
-holdWallet = holdPercentage * leverage * initalWallet
-algoPercentage = ((wallet - initalWallet)/initalWallet)
-vsHoldPercentage = ((wallet - holdWallet)/holdWallet) * 100
 # -- BackTest Analyses --
 dt = dt.set_index(dt['date'])
 dt.index = pd.to_datetime(dt.index)
